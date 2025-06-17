@@ -5,14 +5,13 @@ export $(shell sed 's/=.*//' .env)
 
 MIGRATE_DATABASE_URL = postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
 
-all: build up migrate-up seed
+all: build up 
 
 up:
 	docker-compose up -d
 
 down:
 	docker-compose down -v
-
 build:
 	docker-compose build --no-cache
 migrate-up:

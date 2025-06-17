@@ -10,7 +10,12 @@ import (
 	"insider-project/internal/cache"
 	"insider-project/internal/db"
 	"insider-project/internal/scheduler"
+	"github.com/golang-migrate/migrate/v4"
 	cfg "insider-project/internal/config"
+	pkgdb "insider-project/pkg/db"  
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"  
+	_ "github.com/golang-migrate/migrate/v4/source/file" 
+
 )
 
 func main() {
@@ -32,6 +37,35 @@ func main() {
 			log.Fatal("Exceeded maximum database connection retries.")
 		}
 	}
+
+	dbURL := cfg.GetMigrateDB_URL()
+	migrationsPath := "file:///app/insider-project/migrations"
+	m, err := migrate.New(
+		migrationsPath,
+		dbURL,
+	)
+	if err != nil {
+		log.Fatalf("Failed to initialize migrate: %v", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("Failed to apply migrations: %v", err)
+	}
+
+	if err == nil {
+		log.Println("Database migrations applied successfully!")
+	} else if err == migrate.ErrNoChange {
+		log.Println("No new database migrations to apply.")
+	}
+
+
+	log.Println("Seeding initial messages during server startup...")
+	if err := pkgdb.SeedMessages(db.DB); err != nil { 
+		log.Fatalf("Failed to seed messages during server startup: %v", err)
+	}
+	log.Println("Database seeding completed during server startup!")
+	 
+
 
 	redisAddr := os.Getenv("REDIS_ADDR")
 	if err := cache.InitRedis(redisAddr); err != nil {

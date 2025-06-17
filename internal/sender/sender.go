@@ -1,12 +1,12 @@
 package sender
 
 import (
-    "bytes"
-    "encoding/json"
-    "errors"
-    "net/http"
-    "os"
-    "time"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"os"
+	"time"
 )
 
 type WebhookResponse struct {
@@ -28,7 +28,6 @@ func SendMessage(to, content string) (string, error) {
     req, _ := http.NewRequest("POST", os.Getenv("WEBHOOK_URL"), bytes.NewBuffer(payload))
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("x-ins-auth-key", os.Getenv("WEBHOOK_AUTH_KEY"))
-
     resp, err := client.Do(req)
     if err != nil {
         return "", err
