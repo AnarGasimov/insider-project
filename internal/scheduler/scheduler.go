@@ -25,8 +25,7 @@ func Start() error {
 	mu.Unlock()
 
 	go func() {
-		log.Println("Scheduler started. Performing initial message processing...")
-
+		
 		ticker := time.NewTicker(2 * time.Minute)
 		defer ticker.Stop()
 
@@ -34,7 +33,7 @@ func Start() error {
 			select {
 			case <-ticker.C:
 				log.Println("Scheduler: 2-minute interval passed. Processing messages...")
-				processMessages()
+				ProcessMessages()
 			case <-stopChan:
 				log.Println("Scheduler received stop signal. Stopping...")
 				return
@@ -44,7 +43,7 @@ func Start() error {
 	return nil
 }
 
-func processMessages() {
+func ProcessMessages() {
 	messages, err := db.GetUnsentMessages(2)
 	if err != nil {
 		log.Println("Error fetching messages:", err)

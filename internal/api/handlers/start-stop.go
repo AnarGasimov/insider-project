@@ -11,6 +11,7 @@ func StartHandler(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
+    scheduler.ProcessMessages()
     c.JSON(http.StatusOK, gin.H{"message": "Scheduler started"})
 }
 
