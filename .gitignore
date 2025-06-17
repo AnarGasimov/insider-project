@@ -1,0 +1,40 @@
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+*.bak
+*.orig
+*.rej
+*~
+# Executables for current Go module
+/go.mod
+/go.sum
+/go.work
+/go.work.sum
+/bin/
+/obj/
+# Removed /pkg/ as it contains source code in this project
+# Test binary, generated with `go test -c`
+*.test
+# Build outputs
+/output/
+# VS Code
+.vscode/
+# IDEs
+.idea/
+.project/
+
+# Docker
+# Local environment variables
+.env
+# Docker volumes
+volumes/
+# Docker build context directories
+# Dockerfile specific files
+Dockerfile.bak
+
+# Log files
+*.log

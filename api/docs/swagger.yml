@@ -1,0 +1,46 @@
+swagger: "2.0"
+info:
+  title: Insider Message Sending API
+  version: 1.0
+basePath: /api/v1
+paths:
+  /start:
+    post:
+      summary: Start scheduler
+      responses:
+        200:
+          description: Scheduler started
+        500:
+          description: Error
+  /stop:
+    post:
+      summary: Stop scheduler
+      responses:
+        200:
+          description: Scheduler stopped
+  /sent:
+    get:
+      summary: Get sent messages
+      parameters:
+        - name: limit
+          in: query
+          type: integer
+        - name: offset
+          in: query
+          type: integer
+      responses:
+        200:
+          description: List of sent messages
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                content:
+                  type: string
+                phone:
+                  type: string
+                sent_at:
+                  type: string
