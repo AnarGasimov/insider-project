@@ -10,8 +10,6 @@
 *.rej
 *~
 # Executables for current Go module
-/go.mod
-/go.sum
 /go.work
 /go.work.sum
 /bin/

@@ -21,10 +21,10 @@ To set up and run the project, ensure you have Docker and Docker Compose install
 ### 1. Clone the Repository
 
 ```sh
-git clone <your-repository-url>
+git clone <repository-url>
 cd insider-project
 ```
-> Replace `<your-repository-url>` with the actual URL of your Git repository.
+> Replace `<repository-url>` with the actual URL of Git repository.
 
 ---
 
