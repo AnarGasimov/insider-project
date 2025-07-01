@@ -24,9 +24,11 @@ func main() {
 
 	const maxRetries = 10
 	const retryDelay = 5 * time.Second
-
+	var store db.MessageStore
+	var err error
+	
 	for i := 0; i < maxRetries; i++ {
-		err := db.InitDB(dsn)
+		store, err = db.InitDB(dsn)
 		if err == nil {
 			log.Println("Successfully connected to the database.")
 			break
@@ -60,7 +62,8 @@ func main() {
 
 
 	log.Println("Seeding initial messages during server startup...")
-	if err := pkgdb.SeedMessages(db.DB); err != nil { 
+
+	if err := pkgdb.SeedMessages(store.GetDB()); err != nil { 
 		log.Fatalf("Failed to seed messages during server startup: %v", err)
 	}
 	log.Println("Database seeding completed during server startup!")
@@ -73,13 +76,13 @@ func main() {
 	}
 	log.Println("Successfully connected to Redis.")
 
-	
+	scheduler.SetStore(store)
 	go scheduler.Start()
 	log.Println("Scheduler started.")
 
 	
 	r := gin.Default()
-	api.SetupRoutes(r)
+	api.SetupRoutes(r,store)
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -7,13 +7,27 @@ import (
 	"log"
 	"sync"
 	"time"
-)
+) 
+
+
 
 var (
 	running  bool
 	mu       sync.Mutex
 	stopChan = make(chan struct{})
+	store db.MessageStore
+	StartFunc func()error
+	ProcessMessagesFunc func()
 )
+
+func init(){
+	StartFunc = Start
+	ProcessMessagesFunc = ProcessMessages
+}
+
+func SetStore(s db.MessageStore) {
+	store = s
+}
 
 func Start() error {
 	mu.Lock()
@@ -33,7 +47,7 @@ func Start() error {
 			select {
 			case <-ticker.C:
 				log.Println("Scheduler: 2-minute interval passed. Processing messages...")
-				ProcessMessages()
+				ProcessMessagesFunc()
 			case <-stopChan:
 				log.Println("Scheduler received stop signal. Stopping...")
 				return
@@ -44,19 +58,20 @@ func Start() error {
 }
 
 func ProcessMessages() {
-	messages, err := db.GetUnsentMessages(2)
+
+	messages, err := store.GetUnsentMessages(2)
 	if err != nil {
 		log.Println("Error fetching messages:", err)
 		return
 	}
 	for _, msg := range messages {
 		log.Println("msg: ", msg)
-		messageID, err := sender.SendMessage(msg.Phone, msg.Content)
+		messageID, err := sender.Service.SendMessage(msg.Phone, msg.Content)
 		if err != nil {
 			log.Println("Error sending message:", err)
 			continue
 		}
-		if err := db.MarkMessageSent(msg.ID); err != nil {
+		if err := store.MarkMessageSent(msg.ID); err != nil {
 			log.Println("Error marking message sent:", err)
 			continue
 		}

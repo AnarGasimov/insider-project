@@ -7,11 +7,11 @@ import (
 )
 
 func StartHandler(c *gin.Context) {
-    if err := scheduler.Start(); err != nil {
+    if err := scheduler.StartFunc(); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
-    scheduler.ProcessMessages()
+    scheduler.ProcessMessagesFunc()
     c.JSON(http.StatusOK, gin.H{"message": "Scheduler started"})
 }
 

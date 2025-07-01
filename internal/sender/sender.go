@@ -14,7 +14,20 @@ type WebhookResponse struct {
     MessageID string `json:"messageId"`
 }
 
-func SendMessage(to, content string) (string, error) {
+var Service SenderService = defaultSender{}
+
+type SenderService interface{
+    SendMessage(to, content string) (string,error)
+}
+
+type defaultSender struct {}
+
+func (s defaultSender) SendMessage(to, content string) (string, error) {
+   client := &http.Client{Timeout: 5 * time.Second}
+   return SendMessageWithClient(to,content,client)
+}
+
+func SendMessageWithClient(to, content string, client *http.Client)(string,error){
     if len(content) > 160 {
         return "", errors.New("content exceeds 160 characters")
     }
@@ -23,11 +36,9 @@ func SendMessage(to, content string) (string, error) {
         "to":      to,
         "content": content,
     })
-
-    client := &http.Client{Timeout: 10 * time.Second}
+    
     req, _ := http.NewRequest("POST", os.Getenv("WEBHOOK_URL"), bytes.NewBuffer(payload))
     req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("x-ins-auth-key", os.Getenv("WEBHOOK_AUTH_KEY"))
     resp, err := client.Do(req)
     if err != nil {
         return "", err

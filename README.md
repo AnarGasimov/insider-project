@@ -30,7 +30,20 @@ cd insider-project
 
 ### 2. Configure Webhook URL
 
-The application sends messages to a webhook. Please create a `.env` file in the project root (next to `docker-compose.yml`) and set your specific `WEBHOOK_URL` and `WEBHOOK_AUTH_KEY` that you wish to use for testing. For consistency, I recommend using the `WEBHOOK_URL` and `WEBHOOK_AUTH_KEY` that I will provide separately, which were used during my development and testing.
+
+The application sends messages to a webhook. Please create a `.env` file in the project root (next to `docker-compose.yml`) and set your specific `WEBHOOK_URL` that you wish to use for testing.
+
+
+The webhook expects a `POST` request with the `Content-Type` header set to `application/json`, and it responds with a `202 Accepted` status code. Ensure that your receiver can parse the following sample payload:
+
+```json
+{
+  "to": "+905551000000",
+  "content": "Initial Message 1 – 13:26:23"
+}
+```
+
+For consistency, I recommend using the WEBHOOK_URL generated from https://webhook.site during development. The WEBHOOK_AUTH_KEY used was a dummy and is not required.
 
 ```env
 # .env example
@@ -39,7 +52,7 @@ POSTGRES_PASSWORD=secret
 POSTGRES_DB=mydb
 REDIS_ADDR=redis:6379
 WEBHOOK_URL=YOUR_PROVIDED_WEBHOOK_URL_HERE
-WEBHOOK_AUTH_KEY=YOUR_PROVIDED_AUTH_KEY_HERE
+WEBHOOK_AUTH_KEY=dummy
 PORT=8080
 ```
 

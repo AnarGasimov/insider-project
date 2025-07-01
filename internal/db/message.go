@@ -5,9 +5,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
-
+type MessageStore interface {
+    GetSentMessages(limit, offset int) ([]Message, error)
+	GetUnsentMessages(limit int) ([]Message, error)
+	MarkMessageSent(id int) error
+	GetDB() *sql.DB
+}
  
+type PostgresStore struct {
+	DB *sql.DB
+}
+
 type Message struct {
 	ID      int
 	Content string
@@ -15,19 +23,25 @@ type Message struct {
 	SentAt  sql.NullTime
 }
 
-func InitDB(dsn string) error {
-	var err error
-	DB, err = sql.Open("postgres", dsn)
-	if err != nil {
-		return err
-	}
-	DB.SetMaxOpenConns(10) 
-	return DB.Ping()
+func InitDB(dsn string) (MessageStore, error) {
+    db, err := sql.Open("postgres", dsn)
+    if err != nil {
+        return nil, err
+    }
+    db.SetMaxOpenConns(10)
+    if err := db.Ping(); err != nil {
+        return nil, err
+    }
+
+    return &PostgresStore{DB: db}, nil
 }
 
+func (p *PostgresStore) GetDB() *sql.DB {
+	return p.DB
+}
 
-func GetUnsentMessages(limit int) ([]Message, error) {
-	rows, err := DB.Query("SELECT id, content, phone FROM messages WHERE sent = FALSE LIMIT $1", limit)
+func (p *PostgresStore) GetUnsentMessages(limit int) ([]Message, error) {
+	rows, err := p.DB.Query("SELECT id, content, phone FROM messages WHERE sent = FALSE LIMIT $1", limit)
 	if err != nil {
 		return nil, err
 	}
@@ -45,13 +59,13 @@ func GetUnsentMessages(limit int) ([]Message, error) {
 }
 
 
-func MarkMessageSent(id int) error {
-	_, err := DB.Exec("UPDATE messages SET sent = TRUE, sent_at = NOW() WHERE id = $1", id)
+func (p *PostgresStore) MarkMessageSent(id int) error {
+	_, err := p.DB.Exec("UPDATE messages SET sent = TRUE, sent_at = NOW() WHERE id = $1", id)
 	return err
 }
 
-func GetSentMessages(limit, offset int) ([]Message, error) {
-	rows, err := DB.Query("SELECT id, content, phone, sent_at FROM messages WHERE sent = TRUE LIMIT $1 OFFSET $2", limit, offset)
+func (p *PostgresStore) GetSentMessages(limit, offset int) ([]Message, error) {
+	rows, err := p.DB.Query("SELECT id, content, phone, sent_at FROM messages WHERE sent = TRUE LIMIT $1 OFFSET $2", limit, offset)
 	if err != nil {
 		return nil, err
 	}
